@@ -1,0 +1,21 @@
+diff --git a/src/IRTS/CodegenPHP.hs b/src/IRTS/CodegenPHP.hs
+index e6d7129..64f09c1 100644
+--- a/src/IRTS/CodegenPHP.hs
++++ b/src/IRTS/CodegenPHP.hs
+@@ -91,6 +91,7 @@ cgBody ret (SConst c) = ret $ cgConst c
+ cgBody ret (SOp op args) = ret $ cgOp op (map cgVar args)
+ cgBody ret SNothing = ret "0"
+ cgBody ret (SError x) = ret $ "error( " ++ show x ++ ")"
++cgBody ret (SForeign _ (FStr "idris_time") _) = ret $ "time()" -- FFI support for time()
+ cgBody ret _ = ret $ "error(\"NOT IMPLEMENTED!!!!\")"
+ 
+ cgAlt :: (String -> String) -> String -> SAlt -> String
+@@ -151,6 +152,8 @@ cgOp LReadStr [_] = "idris_readStr()"
+ cgOp LStrConcat [l,r] = "idris_append(" ++ l ++ ", " ++ r ++ ")"
+ cgOp LStrCons [l,r] = "idris_append(chr(" ++ l ++ "), " ++ r ++ ")"
+ cgOp (LStrInt _) [x] = x
++cgOp (LSRem (ATInt _)) [l, r]
++     = "(" ++ l ++ " % " ++ r ++ ")" -- modular arithmetic support for random numbers
+ cgOp op exps = "error(\"OPERATOR " ++ show op ++ " NOT IMPLEMENTED!!!!\")"
+    -- error("Operator " ++ show op ++ " not implemented")
+ 
